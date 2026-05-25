@@ -1,0 +1,107 @@
+@model BusTicketManagement.Models.User
+
+@{
+    ViewData["Title"] = "Chi Tiết Người Dùng";
+    var tickets = ViewBag.Tickets ?? new List<dynamic>();
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4">👤 Chi Tiết Người Dùng</h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Thông Tin Cơ Bản</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Mã KH:</strong> #@Model.Id</p>
+                    <p><strong>Tên:</strong> @Model.FullName</p>
+                    <p><strong>Email:</strong> @Model.Email</p>
+                    <p><strong>SĐT:</strong> @Model.PhoneNumber</p>
+                    <p><strong>Ngày Tạo:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Thông Tin Thành Viên</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <strong>Hạng Thành Viên:</strong>
+                        @{
+                            var rankClass = Model.Rank switch
+                            {
+                                "Gold" => "badge bg-warning text-dark",
+                                "Silver" => "badge bg-secondary",
+                                "Bronze" => "badge bg-danger",
+                                _ => "badge bg-light"
+                            };
+                        }
+                        <span class="@rankClass" style="font-size: 1.1em;">@Model.Rank</span>
+                    </p>
+                    <p><strong>Điểm Tích Lũy:</strong> <span style="font-size: 1.5em; color: #28a745;">@Model.Points</span> pts</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lịch sử mua vé -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">📅 Lịch Sử Mua Vé (@tickets.Count)</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã Vé</th>
+                        <th>Tuyến</th>
+                        <th>Ghế</th>
+                        <th>Ngày Khởi Hành</th>
+                        <th>Trạng Thái</th>
+                        <th>Ngày Đặt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (tickets.Count > 0)
+                    {
+                        @foreach (var ticket in tickets)
+                        {
+                            var statusClass = ticket.Status switch
+                            {
+                                "Active" => "badge bg-success",
+                                "Cancelled" => "badge bg-danger",
+                                "Used" => "badge bg-info",
+                                _ => "badge bg-secondary"
+                            };
+
+                            <tr>
+                                <td><strong>#@ticket.Id</strong></td>
+                                <td>@ticket.Trip.Route.From → @ticket.Trip.Route.To</td>
+                                <td>@ticket.SeatNumber</td>
+                                <td>@ticket.Trip.DepartureTime.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td><span class="@statusClass">@ticket.Status</span></td>
+                                <td>@ticket.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">Chưa có lịch sử mua vé</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="/Admin/User" class="btn btn-secondary btn-lg">← Quay Lại</a>
+    </div>
+</div>
+

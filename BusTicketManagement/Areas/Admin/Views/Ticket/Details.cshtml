@@ -1,0 +1,90 @@
+@model BusTicketManagement.Models.Ticket
+
+@{
+    ViewData["Title"] = "Chi Tiết Vé";
+}
+
+<div class="container mt-5 col-md-8">
+    <h2 class="mb-4">🎫 Chi Tiết Vé #@Model.Id</h2>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Thông Tin Khách Hàng</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Tên:</strong> @Model.User?.FullName</p>
+                    <p><strong>Email:</strong> @Model.User?.Email</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>SĐT:</strong> @Model.User?.PhoneNumber</p>
+                    <p><strong>Hạng thành viên:</strong> @Model.User?.Rank</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Thông Tin Chuyến Xe</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Tuyến:</strong> @Model.Trip?.Route?.From → @Model.Trip?.Route?.To</p>
+                    <p><strong>Nhà xe:</strong> @Model.Trip?.BusOperator?.Name</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Ngày khởi hành:</strong> @Model.Trip?.DepartureTime.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p><strong>Giá vé:</strong> @Model.Trip?.Price.ToString("N0")đ</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">Thông Tin Vé</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Mã Vé:</strong> #@Model.Id</p>
+                    <p><strong>Ghế:</strong> @Model.SeatNumber</p>
+                </div>
+                <div class="col-md-6">
+                    <p>
+                        <strong>Trạng Thái:</strong>
+                        @{
+                            var badgeClass = Model.Status switch
+                            {
+                                "Active" => "badge bg-success",
+                                "Cancelled" => "badge bg-danger",
+                                "Used" => "badge bg-info",
+                                _ => "badge bg-secondary"
+                            };
+                        }
+                        <span class="@badgeClass">@Model.Status</span>
+                    </p>
+                    <p><strong>Ngày tạo:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Status == "Active")
+    {
+        <div class="mb-3">
+            <form method="post" action="/Admin/Ticket/Cancel/@Model.Id">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('Bạn chắc chắn muốn hủy vé này?')">
+                    🗑️ Hủy Vé
+                </button>
+            </form>
+        </div>
+    }
+
+    <a href="/Admin/Ticket" class="btn btn-secondary btn-lg">← Quay Lại</a>
+</div>
+

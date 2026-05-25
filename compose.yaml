@@ -1,0 +1,7 @@
+﻿services:
+  busticketmanagement:
+    image: busticketmanagement
+    build:
+      context: .
+      dockerfile: BusTicketManagement/Dockerfile
+

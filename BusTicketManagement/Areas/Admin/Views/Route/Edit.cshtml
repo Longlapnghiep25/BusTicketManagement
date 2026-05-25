@@ -1,0 +1,37 @@
+@model BusTicketManagement.Models.Route
+
+@{
+    ViewData["Title"] = "Sửa Tuyến Đường";
+}
+
+<div class="container mt-5 col-md-6">
+    <h2 class="mb-4">✏️ Sửa Tuyến Đường</h2>
+
+    <form method="post" action="/Admin/Route/Edit/@Model.Id">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" name="Id" value="@Model.Id">
+        <input type="hidden" name="CreatedAt" value="@Model.CreatedAt">
+
+        <div class="mb-3">
+            <label for="From" class="form-label">Điểm Đi *</label>
+            <input type="text" class="form-control" id="From" name="From" value="@Model.From" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="To" class="form-label">Điểm Đến *</label>
+            <input type="text" class="form-control" id="To" name="To" value="@Model.To" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="BaseDistance" class="form-label">Khoảng Cách (km)</label>
+            <input type="number" class="form-control" id="BaseDistance" name="BaseDistance" value="@Model.BaseDistance" step="0.01">
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">💾 Cập Nhật</button>
+            <a href="/Admin/Route" class="btn btn-secondary">❌ Hủy</a>
+        </div>
+    </form>
+</div>
+

@@ -1,0 +1,37 @@
+@model BusTicketManagement.Models.BusOperator
+
+@{
+    ViewData["Title"] = "Thêm Nhà Xe";
+}
+
+<div class="container mt-5 col-md-6">
+    <h2 class="mb-4">➕ Thêm Nhà Xe Mới</h2>
+
+    <form method="post" action="/Admin/BusOperator/Create" class="needs-validation">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label for="Name" class="form-label">Tên Nhà Xe *</label>
+            <input type="text" class="form-control" id="Name" name="Name" placeholder="VD: Thương Tín Bus" required>
+            <span class="text-danger">@Html.ValidationMessageFor(m => m.Name)</span>
+        </div>
+
+        <div class="mb-3">
+            <label for="Hotline" class="form-label">Hotline *</label>
+            <input type="tel" class="form-control" id="Hotline" name="Hotline" placeholder="VD: 0123456789" required>
+            <span class="text-danger">@Html.ValidationMessageFor(m => m.Hotline)</span>
+        </div>
+
+        <div class="mb-3">
+            <label for="Policy" class="form-label">Chính Sách</label>
+            <textarea class="form-control" id="Policy" name="Policy" rows="4" placeholder="Nhập chính sách của nhà xe..."></textarea>
+            <span class="text-danger">@Html.ValidationMessageFor(m => m.Policy)</span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">💾 Lưu</button>
+            <a href="/Admin/BusOperator" class="btn btn-secondary">❌ Hủy</a>
+        </div>
+    </form>
+</div>
+

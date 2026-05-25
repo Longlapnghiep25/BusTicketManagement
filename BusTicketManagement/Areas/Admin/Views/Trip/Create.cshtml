@@ -1,0 +1,57 @@
+@model BusTicketManagement.Models.Trip
+
+@{
+    ViewData["Title"] = "Thêm Chuyến Xe";
+}
+
+<div class="container mt-5 col-md-6">
+    <h2 class="mb-4">➕ Thêm Chuyến Xe Mới</h2>
+
+    <form method="post" action="/Admin/Trip/Create">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label for="BusOperatorId" class="form-label">Nhà Xe *</label>
+            <select class="form-control" id="BusOperatorId" name="BusOperatorId" required>
+                <option value="">-- Chọn Nhà Xe --</option>
+                @foreach (var op in ViewBag.BusOperators)
+                {
+                    <option value="@op.Id">@op.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="RouteId" class="form-label">Tuyến Đường *</label>
+            <select class="form-control" id="RouteId" name="RouteId" required>
+                <option value="">-- Chọn Tuyến --</option>
+                @foreach (var route in ViewBag.Routes)
+                {
+                    <option value="@route.Id">@route.From → @route.To</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="DepartureTime" class="form-label">Ngày Giờ Khởi Hành *</label>
+            <input type="datetime-local" class="form-control" id="DepartureTime" name="DepartureTime" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="Price" class="form-label">Giá Vé (đ) *</label>
+            <input type="number" class="form-control" id="Price" name="Price" placeholder="VD: 350000" step="1000" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="TotalSeats" class="form-label">Tổng Ghế</label>
+            <input type="number" class="form-control" id="TotalSeats" name="TotalSeats" value="36" readonly>
+            <small class="text-muted">Mặc định: 36 ghế (A1-A12, B1-B12, C1-C12)</small>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">💾 Lưu</button>
+            <a href="/Admin/Trip" class="btn btn-secondary">❌ Hủy</a>
+        </div>
+    </form>
+</div>
+

@@ -1,0 +1,123 @@
+@model List<BusTicketManagement.Models.Order>
+
+@{
+    ViewData["Title"] = "Quản Lý Đơn Hàng";
+    var searchTerm = ViewBag.SearchTerm ?? "";
+}
+
+<div class="container-fluid mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">💼 Quản Lý Đơn Hàng</h1>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm">
+            <i class="fa fa-check-circle me-2"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Tìm kiếm -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body">
+            <form method="get" action="/Admin/Order/Index" class="row g-3">
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="fa fa-search text-muted"></i></span>
+                        <input type="text" name="searchTerm" class="form-control border-start-0 ps-0" placeholder="Tìm theo Mã Đơn (#123), Email khách hàng hoặc Số điện thoại..." value="@searchTerm">
+                    </div>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Mã Đơn</th>
+                        <th>Khách Hàng</th>
+                        <th>Số Ghế</th>
+                        <th>Thanh Toán</th>
+                        <th>Trạng Thái</th>
+                        <th>Ngày Đặt</th>
+                        <th class="pe-4 text-end">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        @foreach (var order in Model)
+                        {
+                            var statusBadge = order.Status switch
+                            {
+                                "Paid" => "bg-success-subtle text-success border border-success-subtle",
+                                "Pending" => "bg-warning-subtle text-warning-emphasis border border-warning-subtle",
+                                "Cancelled" => "bg-danger-subtle text-danger border border-danger-subtle",
+                                _ => "bg-secondary-subtle text-secondary border border-secondary-subtle"
+                            };
+
+                            <tr>
+                                <td class="ps-4"><strong>#@order.Id</strong></td>
+                                <td>
+                                    <div class="fw-bold">@order.User?.FullName</div>
+                                    <div class="small text-muted">@order.User?.Email</div>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill bg-light text-dark border">
+                                        @order.OrderDetails.Count vé
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-primary">@order.FinalAmount.ToString("N0")đ</div>
+                                    @if(order.DiscountAmount > 0) {
+                                        <div class="small text-danger text-decoration-line-through">@order.TotalAmount.ToString("N0")đ</div>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge @statusBadge px-3 py-2">
+                                        @(order.Status == "Paid" ? "Đã thanh toán" : (order.Status == "Pending" ? "Chờ xử lý" : "Đã hủy"))
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="small">@order.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                    <div class="small text-muted">@order.CreatedAt.ToString("HH:mm")</div>
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <div class="btn-group shadow-sm">
+                                        <a href="/Admin/Order/Details/@order.Id" class="btn btn-sm btn-outline-info" title="Chi tiết">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                        @if (order.Status != "Cancelled")
+                                        {
+                                            <form method="post" action="/Admin/Order/Cancel/@order.Id" class="d-inline" onsubmit="return confirm('Hủy đơn hàng này sẽ giải phóng toàn bộ ghế và hủy vé tương ứng. Tiếp tục?')">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Hủy đơn">
+                                                    <i class="fa fa-times"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="fa fa-folder-open fa-3x mb-3 d-block opacity-25"></i>
+                                Không tìm thấy đơn hàng nào phù hợp.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

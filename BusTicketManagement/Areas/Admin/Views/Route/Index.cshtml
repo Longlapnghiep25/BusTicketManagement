@@ -1,0 +1,63 @@
+@model List<BusTicketManagement.Models.Route>
+
+@{
+    ViewData["Title"] = "Quản Lý Tuyến Đường";
+}
+
+<div class="container-fluid mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>🗺️ Quản Lý Tuyến Đường</h1>
+        <a href="/Admin/Route/Create" class="btn btn-primary btn-lg">➕ Thêm Tuyến</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Điểm Đi</th>
+                        <th>Điểm Đến</th>
+                        <th>Khoảng Cách (km)</th>
+                        <th>Ngày Tạo</th>
+                        <th>Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Count > 0)
+                    {
+                        @foreach (var route in Model)
+                        {
+                            <tr>
+                                <td>@route.Id</td>
+                                <td><strong>@route.From</strong></td>
+                                <td><strong>@route.To</strong></td>
+                                <td>@route.BaseDistance km</td>
+                                <td>@route.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <a href="/Admin/Route/Edit/@route.Id" class="btn btn-sm btn-warning">✏️ Sửa</a>
+                                    <a href="/Admin/Route/Delete/@route.Id" class="btn btn-sm btn-danger">🗑️ Xóa</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">Chưa có tuyến đường nào</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

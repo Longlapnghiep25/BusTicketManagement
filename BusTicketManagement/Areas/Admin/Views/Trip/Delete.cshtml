@@ -1,0 +1,24 @@
+@model BusTicketManagement.Models.Trip
+
+@{
+    ViewData["Title"] = "Xóa Chuyến Xe";
+}
+
+<div class="container mt-5 col-md-6">
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">⚠️ Xác Nhận Xóa</h4>
+        <p>Bạn chắc chắn muốn xóa chuyến <strong>@Model.Route?.From → @Model.Route?.To</strong> lúc <strong>@Model.DepartureTime.ToString("dd/MM/yyyy HH:mm")</strong> không?</p>
+        <hr>
+        <p class="mb-0">Hành động này không thể hoàn tác!</p>
+    </div>
+
+    <form method="post" action="/Admin/Trip/Delete/@Model.Id">
+        @Html.AntiForgeryToken()
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">🗑️ Xác Nhận Xóa</button>
+            <a href="/Admin/Trip" class="btn btn-secondary">❌ Hủy</a>
+        </div>
+    </form>
+</div>
+

@@ -1,0 +1,24 @@
+@model BusTicketManagement.Models.BusOperator
+
+@{
+    ViewData["Title"] = "Xóa Nhà Xe";
+}
+
+<div class="container mt-5 col-md-6">
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">⚠️ Xác Nhận Xóa</h4>
+        <p>Bạn chắc chắn muốn xóa nhà xe <strong>@Model.Name</strong> không?</p>
+        <hr>
+        <p class="mb-0">Hành động này không thể hoàn tác!</p>
+    </div>
+
+    <form method="post" action="/Admin/BusOperator/Delete/@Model.Id">
+        @Html.AntiForgeryToken()
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">🗑️ Xác Nhận Xóa</button>
+            <a href="/Admin/BusOperator" class="btn btn-secondary">❌ Hủy</a>
+        </div>
+    </form>
+</div>
+

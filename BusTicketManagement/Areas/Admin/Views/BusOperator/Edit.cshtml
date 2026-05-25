@@ -1,0 +1,37 @@
+@model BusTicketManagement.Models.BusOperator
+
+@{
+    ViewData["Title"] = "Sửa Nhà Xe";
+}
+
+<div class="container mt-5 col-md-6">
+    <h2 class="mb-4">✏️ Sửa Thông Tin Nhà Xe</h2>
+
+    <form method="post" action="/Admin/BusOperator/Edit/@Model.Id" class="needs-validation">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" name="Id" value="@Model.Id">
+        <input type="hidden" name="CreatedAt" value="@Model.CreatedAt">
+
+        <div class="mb-3">
+            <label for="Name" class="form-label">Tên Nhà Xe *</label>
+            <input type="text" class="form-control" id="Name" name="Name" value="@Model.Name" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="Hotline" class="form-label">Hotline *</label>
+            <input type="tel" class="form-control" id="Hotline" name="Hotline" value="@Model.Hotline" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="Policy" class="form-label">Chính Sách</label>
+            <textarea class="form-control" id="Policy" name="Policy" rows="4">@Model.Policy</textarea>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">💾 Cập Nhật</button>
+            <a href="/Admin/BusOperator" class="btn btn-secondary">❌ Hủy</a>
+        </div>
+    </form>
+</div>
+

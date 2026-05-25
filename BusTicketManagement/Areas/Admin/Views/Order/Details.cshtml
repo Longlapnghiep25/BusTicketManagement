@@ -1,0 +1,282 @@
+@model BusTicketManagement.Models.Order
+
+@{
+    ViewData["Title"] = "Chi Tiết Đơn Hàng #" + Model.Id;
+}
+
+<div class="container mt-5">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a asp-area="Admin"
+                   asp-controller="Order"
+                   asp-action="Index">
+                    Đơn Hàng
+                </a>
+            </li>
+
+            <li class="breadcrumb-item active" aria-current="page">
+                Chi tiết #@Model.Id
+            </li>
+        </ol>
+    </nav>
+
+    <div class="row">
+
+        <!-- LEFT -->
+        <div class="col-md-8">
+
+            <!-- ORDER INFO -->
+            <div class="card shadow-sm mb-4">
+
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        📋 Thông Tin Đơn Hàng #@Model.Id
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- STATUS -->
+                    <div class="row mb-3">
+
+                        <div class="col-sm-4 text-muted">
+                            Trạng Thái:
+                        </div>
+
+                        <div class="col-sm-8">
+
+                            @{
+                                var statusClass = Model.Status switch
+                                {
+                                    "Paid" => "badge bg-success",
+                                    "Pending" => "badge bg-warning text-dark",
+                                    "Cancelled" => "badge bg-danger",
+                                    _ => "badge bg-secondary"
+                                };
+                            }
+
+                            <span class="@statusClass px-3 py-2">
+                                @Model.Status
+                            </span>
+
+                        </div>
+                    </div>
+
+                    <!-- CREATED -->
+                    <div class="row mb-3">
+
+                        <div class="col-sm-4 text-muted">
+                            Ngày Đặt:
+                        </div>
+
+                        <div class="col-sm-8">
+                            @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")
+                        </div>
+
+                    </div>
+
+                    <!-- PAID -->
+                    @if (Model.PaidAt.HasValue)
+                    {
+                        <div class="row mb-3">
+
+                            <div class="col-sm-4 text-muted">
+                                Ngày Thanh Toán:
+                            </div>
+
+                            <div class="col-sm-8">
+                                @Model.PaidAt.Value.ToString("dd/MM/yyyy HH:mm:ss")
+                            </div>
+
+                        </div>
+                    }
+
+                    <hr />
+
+                    <!-- TICKETS -->
+                    <h5 class="mb-3">
+                        🎟️ Danh Sách Vé
+                    </h5>
+
+                    <div class="table-responsive">
+
+                        <table class="table table-bordered table-hover align-middle">
+
+                            <thead class="table-light">
+
+                                <tr>
+                                    <th>Chuyến Xe</th>
+                                    <th>Nhà Xe</th>
+                                    <th>Ghế</th>
+                                    <th>Giá</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var od in Model.OrderDetails)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            @od.Trip?.Route?.From
+                                            →
+                                            @od.Trip?.Route?.To
+                                        </td>
+
+                                        <td>
+                                            @od.Trip?.BusOperator?.Name
+                                        </td>
+
+                                        <td>
+                                            <strong>
+                                                @od.SeatNumber
+                                            </strong>
+                                        </td>
+
+                                        <td class="text-success fw-bold">
+                                            @String.Format("{0:N0} đ", od.Price)
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col-md-4">
+
+            <!-- CUSTOMER -->
+            <div class="card shadow-sm mb-4">
+
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        👤 Khách Hàng
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <h5>
+                        @Model.User?.FullName
+                    </h5>
+
+                    <p class="text-muted mb-2">
+                        <i class="fa-solid fa-envelope"></i>
+                        @Model.User?.Email
+                    </p>
+
+                    <p class="text-muted">
+                        <i class="fa-solid fa-phone"></i>
+                        @Model.User?.PhoneNumber
+                    </p>
+
+                    <a asp-area="Admin"
+                       asp-controller="User"
+                       asp-action="Details"
+                       asp-route-id="@Model.UserId"
+                       class="btn btn-outline-primary w-100">
+
+                        Xem hồ sơ khách
+
+                    </a>
+
+                </div>
+            </div>
+
+            <!-- PAYMENT -->
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        💰 Thanh Toán
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tạm tính:</span>
+
+                        <span>
+                            @String.Format("{0:N0} đ", Model.TotalAmount)
+                        </span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2 text-danger">
+
+                        <span>Giảm giá:</span>
+
+                        <span>
+                            -@String.Format("{0:N0} đ", Model.DiscountAmount)
+                        </span>
+
+                    </div>
+
+                    @if (Model.Promotion != null)
+                    {
+                        <div class="small text-muted mb-3">
+
+                            Mã giảm giá:
+                            <strong>@Model.Promotion.Code</strong>
+
+                        </div>
+                    }
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between">
+
+                        <span class="h5">
+                            Thực thu:
+                        </span>
+
+                        <span class="h5 text-primary fw-bold">
+
+                            @String.Format("{0:N0} đ", Model.FinalAmount)
+
+                        </span>
+
+                    </div>
+
+                    <!-- CANCEL -->
+                    @if (Model.Status != "Cancelled")
+                    {
+                        <form asp-area="Admin"
+                              asp-controller="Order"
+                              asp-action="Cancel"
+                              asp-route-id="@Model.Id"
+                              method="post"
+                              class="mt-4">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-danger w-100"
+                                    onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này?')">
+
+                                Hủy Đơn Hàng
+
+                            </button>
+
+                        </form>
+                    }
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,201 @@
+@model List<BusTicketManagement.Models.Order>
+
+@{
+    ViewData["Title"] = "Dashboard - Quản lý Hệ thống";
+    var totalRevenue = ViewBag.TotalRevenue ?? 0;
+    var totalTicketsSold = ViewBag.TotalTicketsSold ?? 0;
+    var newCustomers = ViewBag.NewCustomers ?? 0;
+    var totalBusOperators = ViewBag.TotalBusOperators ?? 0;
+    var bookingTrend = ViewBag.BookingTrend ?? new List<dynamic>();
+}
+
+<div class="container-fluid mt-5">
+    <h1 class="mb-4">📊 Dashboard Hệ Thống Đặt Vé Xe</h1>
+
+    <!-- AD-01: Thẻ Thống Kê Tổng Quát -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">💰 Tổng Doanh Thu</h5>
+                    <h2>@(((long)totalRevenue).ToString("N0"))đ</h2>
+                    <small class="text-light">Tháng này</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-success shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">🎫 Vé Đã Bán</h5>
+                    <h2>@totalTicketsSold</h2>
+                    <small class="text-light">Tổng cộng</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-warning shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">👥 Khách Hàng Mới</h5>
+                    <h2>@newCustomers</h2>
+                    <small class="text-light">30 ngày gần nhất</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-danger shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">🚌 Nhà Xe Đối Tác</h5>
+                    <h2>@totalBusOperators</h2>
+                    <small class="text-light">Đang hoạt động</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AD-02: Biểu Đồ Xu Hướng -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">📈 Xu Hướng Đặt Vé - 30 Ngày Gần Nhất</h5>
+        </div>
+        <div class="card-body">
+            <canvas id="bookingChart" height="80"></canvas>
+        </div>
+    </div>
+
+    <!-- AD-03: Bảng Đơn Hàng Chờ Xử Lý -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">⏳ Top 10 Đơn Hàng Mới Nhất Chờ Xử Lý</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã Đơn</th>
+                        <th>Khách Hàng</th>
+                        <th>Tuyến Đường</th>
+                        <th>Số Vé</th>
+                        <th>Tổng Tiền</th>
+                        <th>Ngày Đặt</th>
+                        <th>Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td><strong>#@order.Id</strong></td>
+                                <td>@order.User?.FullName ?? "Khách vãng lai"</td>
+                                <td>
+                                    @{
+                                        var firstOd = order.OrderDetails?.FirstOrDefault();
+                                        if (firstOd != null && firstOd.Trip != null && firstOd.Trip.Route != null)
+                                        {
+                                            <span>@firstOd.Trip.Route.From → @firstOd.Trip.Route.To</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                    }
+                                </td>
+                                <td>@order.OrderDetails.Count</td>
+                                <td><strong>@order.FinalAmount.ToString("N0")đ</strong></td>
+                                <td>@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <a href="/Admin/Order/Details/@order.Id" class="btn btn-sm btn-info">Xem</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">Không có đơn hàng nào chờ xử lý</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    @{
+        var dates = new System.Collections.Generic.List<string>();
+        var counts = new System.Collections.Generic.List<int>();
+        var revenues = new System.Collections.Generic.List<double>();
+
+        foreach (var trend in bookingTrend)
+        {
+            dates.Add(trend.Date);
+            counts.Add(trend.Count);
+            revenues.Add(trend.Revenue);
+        }
+    }
+
+    const ctx = document.getElementById('bookingChart').getContext('2d');
+    const bookingChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [@string.Join(", ", dates.Select(d => $"\"{d}\""))],
+            datasets: [
+                {
+                    label: 'Số Đơn Hàng',
+                    data: [@string.Join(", ", counts)],
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Doanh Thu (triệu đ)',
+                    data: [@string.Join(", ", revenues.Select(r => (r / 1000000).ToString("0.00")))],
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    borderWidth: 2,
+                    type: 'line',
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Số Đơn Hàng'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Doanh Thu (triệu đ)'
+                    },
+                    grid: {
+                        drawOnChartArea: false
+                    }
+                }
+            }
+        }
+    });
+</script>
+
