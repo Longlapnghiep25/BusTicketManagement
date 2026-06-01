@@ -9,5 +9,13 @@
       <jdbc-url>Server=localhost,1433;Database=BusBookingDB;User Id=sa;Password=LeTuanLong@252;TrustServerCertificate=True;Encrypt=False</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="BusBookingDB@localhost [2]" uuid="9556519f-1822-45d2-86c2-e124ec434c59">
+      <driver-ref>mysql.8</driver-ref>
+      <synchronize>true</synchronize>
+      <configured-by-url>true</configured-by-url>
+      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://localhost:3306/BusBookingDB?user=root&amp;password=LeTuanLong@252</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

@@ -10,7 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
  
 // ── Database ────────────────────────────────────────────
 builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    opt.UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        ServerVersion.AutoDetect(
+            builder.Configuration.GetConnectionString("DefaultConnection"))));
  
 // ── Auth: Cookie (Admin Web) + JWT Bearer (API) ─────────
 var jwtKey = builder.Configuration["Jwt:Key"]!;
@@ -74,51 +77,20 @@ using (var scope = app.Services.CreateScope())
     if (env.IsDevelopment())
     {
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        // Ensure DB has necessary new columns (Role on Users, LockedByUserId on Seats).
-        // If migrations haven't been applied, try to add the columns safely using ALTER TABLE.
-        try
+        // Now safe to check for existing admin
+        if (!db.Users.Any(u => u.Role == "Admin"))
         {
-            var conn = db.Database.GetDbConnection();
-            conn.Open();
-            using (var cmd = conn.CreateCommand())
+            var admin = new BusTicketManagement.Models.User
             {
-                cmd.CommandText = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='Users' AND COLUMN_NAME='Role'";
-                var hasRole = (int)cmd.ExecuteScalar() > 0;
-                if (!hasRole)
-                {
-                    cmd.CommandText = "ALTER TABLE [Users] ADD [Role] nvarchar(max) NOT NULL CONSTRAINT DF_Users_Role DEFAULT('Customer')";
-                    cmd.ExecuteNonQuery();
-                }
-
-                cmd.CommandText = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='Seats' AND COLUMN_NAME='LockedByUserId'";
-                var hasLockedBy = (int)cmd.ExecuteScalar() > 0;
-                if (!hasLockedBy)
-                {
-                    cmd.CommandText = "ALTER TABLE [Seats] ADD [LockedByUserId] int NULL";
-                    cmd.ExecuteNonQuery();
-                }
-            }
-
-            // Now safe to check for existing admin
-            if (!db.Users.Any(u => u.Role == "Admin"))
-            {
-                var admin = new BusTicketManagement.Models.User
-                {
-                    Email = "admin@localhost",
-                    FullName = "Administrator",
-                    Password = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
-                    Role = "Admin",
-                    Rank = "Gold",
-                    Points = 0
-                };
-                db.Users.Add(admin);
-                db.SaveChanges();
-            }
-        }
-        catch (Exception ex)
-        {
-            // If anything fails (for example permission issues), log and continue — migrations should be applied manually.
-            Console.WriteLine("Warning: automatic schema adjustment failed: " + ex.Message);
+                Email = "admin@localhost",
+                FullName = "Administrator",
+                Password = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
+                Role = "Admin",
+                Rank = "Gold",
+                Points = 0
+            };
+            db.Users.Add(admin);
+            db.SaveChanges();
         }
     }
 }
